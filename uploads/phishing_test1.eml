@@ -1,0 +1,15 @@
+From: Fake Support <alert@security-warning.com>
+To: victim@example.com
+Subject: Urgent Action Required - Account Security
+Date: Sun, 29 Jun 2025 14:16:16 +0000
+Authentication-Results: spf=fail; dkim=fail; dmarc=fail
+
+Dear User,
+
+We detected unusual login activity. Please confirm your identity:
+http://verify-paypal-login.com
+
+Failure to act may result in account suspension.
+
+Regards,
+Security Team
