@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Email Forensics Tool</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono:wght@400&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="matrix-bg"></div>
+    <div class="particles-container" id="particles"></div>
+    <div class="grid-overlay"></div>
+    
+    <!-- Terminal Effect -->
+    <div class="scan-lines"></div>
+    
+    <div class="container">
+        <div class="header-section">
+            <h1 class="main-title">
+                <span class="glitch" data-text="EMAIL FORENSICS SYSTEM">EMAIL FORENSICS SYSTEM</span>
+            </h1>
+            <div class="status-bar">
+                <span class="status-indicator"></span>
+                <span class="status-text">SYSTEM READY</span>
+                <span class="timestamp" id="timestamp"></span>
+            </div>
+        </div>
+
+        <div class="upload-section">
+            <form method="POST" enctype="multipart/form-data" class="forensics-form">
+                <div class="file-input-wrapper">
+                    <input type="file" name="email_file" accept=".eml" required id="fileInput" class="file-input">
+                    <label for="fileInput" class="file-label">
+                        <span class="file-icon">📧</span>
+                        <span class="file-text">SELECT EMAIL FILE (.eml)</span>
+                        <span class="file-subtext">Drag & drop or click to browse</span>
+                    </label>
+                </div>
+                <button type="submit" class="analyze-btn">
+                    <span class="btn-text">INITIATE ANALYSIS</span>
+                    <span class="btn-loading">ANALYZING...</span>
+                </button>
+            </form>
+        </div>
+
+        {% if verdict %}
+            <div class="verdict-section {{ verdict.color }}">
+                <div class="verdict-header">
+                    <h2 class="verdict-title">{{ verdict.label }}</h2>
+                    <div class="threat-level">
+                        {% if verdict.color == 'red' %}
+                            <span class="threat-indicator high">⚠️ HIGH THREAT</span>
+                        {% else %}
+                            <span class="threat-indicator low">✅ LOW THREAT</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="verdict-reasons">
+                    {% for reason in verdict.reasons %}
+                        <div class="reason-item">
+                            <span class="reason-bullet">></span>
+                            <span class="reason-text">{{ reason }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+
+        {% if result %}
+            <div class="analysis-results">
+                <div class="result-section">
+                    <h3 class="section-title">
+                        <span class="section-icon">📋</span>
+                        EMAIL HEADER ANALYSIS
+                    </h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <label>FROM:</label>
+                            <span class="info-value">{{ result['From'] }}</span>
+                        </div>
+                        <div class="info-item">
+                            <label>TO:</label>
+                            <span class="info-value">{{ result['To'] }}</span>
+                        </div>
+                        <div class="info-item">
+                            <label>SUBJECT:</label>
+                            <span class="info-value">{{ result['Subject'] }}</span>
+                        </div>
+                        <div class="info-item">
+                            <label>DATE:</label>
+                            <span class="info-value">{{ result['Date'] }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="result-section">
+                    <h4 class="subsection-title">
+                        <span class="section-icon">🔍</span>
+                        RECEIVED HEADERS
+                    </h4>
+                    <div class="code-block">
+                        {% for line in result['Received'] %}
+                            <div class="code-line">
+                                <span class="line-number">{{ loop.index }}</span>
+                                <span class="line-content">{{ line }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="result-section">
+                    <h4 class="subsection-title">
+                        <span class="section-icon">🛡️</span>
+                        AUTHENTICATION STATUS
+                    </h4>
+                    <div class="auth-grid">
+                        <div class="auth-item">
+                            <span class="auth-label">SPF</span>
+                            <span class="auth-value {{ 'pass' if 'pass' in result['SPF'].lower() else 'fail' }}">{{ result['SPF'] }}</span>
+                        </div>
+                        <div class="auth-item">
+                            <span class="auth-label">DKIM</span>
+                            <span class="auth-value {{ 'pass' if 'pass' in result['DKIM'].lower() else 'fail' }}">{{ result['DKIM'] }}</span>
+                        </div>
+                        <div class="auth-item">
+                            <span class="auth-label">DMARC</span>
+                            <span class="auth-value {{ 'pass' if 'pass' in result['DMARC'].lower() else 'fail' }}">{{ result['DMARC'] }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="result-section">
+                    <h4 class="subsection-title">
+                        <span class="section-icon">🌐</span>
+                        URL ANALYSIS
+                    </h4>
+                    <div class="url-list">
+                        {% for url, scan in result['URLs'].items() %}
+                            <div class="url-item">
+                                <span class="url-address">{{ url }}</span>
+                                <span class="url-status {{ 'safe' if 'safe' in scan.lower() else 'suspicious' }}">{{ scan }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                {% if result.Attachments %}
+                    <div class="result-section">
+                        <h4 class="subsection-title">
+                            <span class="section-icon">📎</span>
+                            ATTACHMENT ANALYSIS
+                        </h4>
+                        <div class="attachment-list">
+                            {% for filename, scan in result.Attachments.items() %}
+                                <div class="attachment-item">
+                                    <span class="attachment-name">{{ filename }}</span>
+                                    <span class="attachment-status {{ 'safe' if 'safe' in scan.lower() else 'suspicious' }}">{{ scan }}</span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+
+    <script>
+        // Timestamp update
+        function updateTimestamp() {
+            const now = new Date();
+            const timestamp = now.toLocaleString('en-US', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            });
+            document.getElementById('timestamp').textContent = timestamp;
+        }
+        
+        setInterval(updateTimestamp, 1000);
+        updateTimestamp();
+
+        // Floating particles animation
+        function createParticle() {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDuration = (Math.random() * 3 + 2) + 's';
+            particle.style.opacity = Math.random() * 0.5 + 0.2;
+            document.getElementById('particles').appendChild(particle);
+
+            setTimeout(() => {
+                particle.remove();
+            }, 5000);
+        }
+
+        // Create particles continuously
+        setInterval(createParticle, 300);
+
+        // File input enhancement
+        const fileInput = document.getElementById('fileInput');
+        const fileLabel = document.querySelector('.file-label');
+
+        fileInput.addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                const fileName = e.target.files[0].name;
+                fileLabel.querySelector('.file-text').textContent = fileName;
+                fileLabel.classList.add('file-selected');
+            }
+        });
+
+        // Form submission animation
+        document.querySelector('.forensics-form').addEventListener('submit', function(e) {
+            const btn = document.querySelector('.analyze-btn');
+            btn.classList.add('loading');
+            
+            // Add scanning effect
+            const scanEffect = document.createElement('div');
+            scanEffect.className = 'scanning-overlay';
+            document.body.appendChild(scanEffect);
+        });
+
+        // Drag and drop functionality
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            fileLabel.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            fileLabel.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            fileLabel.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight() {
+            fileLabel.classList.add('drag-over');
+        }
+
+        function unhighlight() {
+            fileLabel.classList.remove('drag-over');
+        }
+
+        fileLabel.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            fileInput.files = files;
+            
+            if (files.length > 0) {
+                const fileName = files[0].name;
+                fileLabel.querySelector('.file-text').textContent = fileName;
+                fileLabel.classList.add('file-selected');
+            }
+        }
+
+        // Add glitch effect on hover
+        document.querySelectorAll('.glitch').forEach(el => {
+            el.addEventListener('mouseenter', function() {
+                this.style.animation = 'glitch 0.3s infinite';
+            });
+            
+            el.addEventListener('mouseleave', function() {
+                this.style.animation = 'none';
+            });
+        });
+
+        // Terminal typing effect for status
+        function typeWriter(element, text, speed = 50) {
+            let i = 0;
+            element.textContent = '';
+            
+            function type() {
+                if (i < text.length) {
+                    element.textContent += text.charAt(i);
+                    i++;
+                    setTimeout(type, speed);
+                }
+            }
+            type();
+        }
+
+        // Initialize with typing effect
+        document.addEventListener('DOMContentLoaded', function() {
+            const statusText = document.querySelector('.status-text');
+            if (statusText) {
+                typeWriter(statusText, 'SYSTEM READY');
+            }
+        });
+    </script>
+</body>
+</html>
