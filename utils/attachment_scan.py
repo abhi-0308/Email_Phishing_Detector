@@ -3,7 +3,7 @@ import requests
 from email import policy
 from email.parser import BytesParser
 
-API_KEY = "8445803baa0217d93437379d45d1c8a876ae488294adea2c61704a72b3fb2a75"  # Replace with your API key
+API_KEY = " "  # Replace with your API key
 
 VT_FILE_SEARCH_URL = "https://www.virustotal.com/api/v3/files/{}"
 
