@@ -30,14 +30,15 @@ A machine learning-based project to detect phishing emails using Natural Languag
    ```bash
    pip install -r requirements.txt
    ```
+3. Replace areas which requires your api key with your api key from the virustotal website
 
-3. Run the Flask App
+4. Run the Flask App
 
    ```bash
    python app.py
    
 
-4. Open in Browser
+5. Open in Browser
    Navigate to `http://127.0.0.1:5000/` to use the phishing detection app.
 
  Project Structure
