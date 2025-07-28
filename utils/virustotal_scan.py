@@ -3,7 +3,7 @@ import requests
 from email import policy
 from email.parser import BytesParser
 
-API_KEY = "8445803baa0217d93437379d45d1c8a876ae488294adea2c61704a72b3fb2a75"
+API_KEY = " " #replace with your api key
 VT_URL = "https://www.virustotal.com/api/v3/urls"
 
 def extract_urls_from_email(filepath):
