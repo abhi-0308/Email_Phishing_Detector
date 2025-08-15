@@ -1,5 +1,5 @@
 
-Email Phishing Detector 
+##Email Phishing Detector 
 
 A machine learning-based project to detect phishing emails using Natural Language Processing (NLP) techniques.
 
