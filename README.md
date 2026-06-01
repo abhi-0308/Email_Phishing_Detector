@@ -2,7 +2,7 @@
 
 A machine learning-based project to detect phishing emails using Natural Language Processing (NLP) techniques.
 
-  Features
+  FEATURES
 
 - Detects whether an email is **phishing** or **legitimate**
 - Trained using TF-IDF Vectorizer and Logistic Regression
